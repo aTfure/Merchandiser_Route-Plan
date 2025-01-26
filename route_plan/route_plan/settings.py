@@ -31,18 +31,26 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Required for AllAuth
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Local apps
     'users',
     'outlets',
     'merchandisers',
+
+    # Third-party apps
+    'rest_framework',
+    'rest_framework.authtoken',
+
 ]
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 
 MIDDLEWARE = [
@@ -54,6 +62,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+# Rest Framework Settings
+
+REST_FRAMEWORK = {
+'DEFAULT_PERMISSION_CLASSES': [
+'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+]
+}
+
 
 ROOT_URLCONF = 'route_plan.urls'
 
