@@ -1,0 +1,17 @@
+// Use @use instead of @import
+@use "variables" as *;
+@use "mixins";
+
+// Load Ant Design CSS directly instead of through Sass
+@import "antd/dist/reset.css";
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-color);
+}
+
+.layout {
+  padding: 20px;
+}

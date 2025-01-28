@@ -1,0 +1,19 @@
+@use "../../styles/variables" as *;
+
+.avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--secondary-color);
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+
+    .user-name {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+  }
+}
