@@ -1,14 +1,7 @@
-import { Card } from "antd";
+import React from "react";
 
-const Dashboard = () => {
-  return (
-    <Card title="Dashboard Overview">
-      <div className="dashboard-content">
-        <h2>Welcome to your dashboard</h2>
-        {/* Add your dashboard content here */}
-      </div>
-    </Card>
-  );
-};
+function Dashboard() {
+  return <div>Dashboard Page</div>;
+}
 
 export default Dashboard;

@@ -3,6 +3,7 @@ import { Layout } from "antd";
 import SiderMenu from "../side-menu/SideMenu";
 import LayoutBanner from "../layout-banner/LayoutBanner";
 import "./MainLayout.scss";
+import { Outlet } from "react-router-dom";
 
 const { Content } = Layout;
 
@@ -23,7 +24,7 @@ const MainLayout = () => {
         />
         <Content style={{ margin: "24px 16px 0" }}>
           <div style={{ padding: 24, background: "#fff", minHeight: 360 }}>
-            <router />
+            <Outlet />
           </div>
         </Content>
       </Layout>
