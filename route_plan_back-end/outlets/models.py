@@ -1,7 +1,7 @@
 from django.db import models
+from django.utils import timezone
 
 class ChannelType(models.Model):
-    channel_type_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
 
     def __str__(self):
@@ -11,12 +11,11 @@ class ChannelType(models.Model):
         db_table = 'channel_types'
 
 class Outlet(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
     channel_type = models.ForeignKey(ChannelType, on_delete=models.CASCADE)
+    merchandiser = models.ForeignKey('merchandisers.Merchandiser', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_outlets')
+    assigned_date = models.DateTimeField(default=timezone.now)
 
     
     def __str__(self):

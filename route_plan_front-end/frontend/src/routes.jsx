@@ -7,8 +7,13 @@ import ShowOutlets from "./pages/admin/outlets/List";
 import AddOutlet from "./pages/admin/outlets/Add";
 import ViewChannels from "./pages/admin/channels/List";
 import AddChannel from "./pages/admin/channels/Add";
+import Login from "./pages/admin/login/Login";
 
 const router = createBrowserRouter([
+  {
+    path: "/auth/log-in",
+    element: <Login />,
+  },
   {
     path: "/",
     element: <MainLayout />,

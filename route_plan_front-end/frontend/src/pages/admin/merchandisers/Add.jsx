@@ -12,34 +12,40 @@ import {
   Switch,
 } from "antd";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateMerchandiserMutation } from "../../../redux/slices/merchandiserSlice";
+import { useGetAllOutletsQuery } from "../../../redux/slices/outletSlice";
 
 function AddMerchandiser() {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const [createMerchandiser, { isLoading }] = useCreateMerchandiserMutation();
+  const {
+    data: outlets,
+    isLoading: outletsLoading,
+    error: outletsError,
+  } = useGetAllOutletsQuery();
 
-  const handleSave = (values) => {
+  const handleSave = async (values) => {
+    try {
+      await createMerchandiser(values).unwrap();
+      message.success("Merchandiser created successfully");
+      navigate("/merchandisers");
+    } catch (err) {
+      message.error("Failed to create merchandiser");
+    }
     console.log("onFinish", values);
     // Call Save API
   };
 
   const requiredFieldRule = [{ required: true, message: "Requied Field" }];
 
-  const outletArray = [
-    {
-      id: 1,
-      value: "Outlet A",
-    },
-    {
-      id: 2,
-      value: "Outlet B",
-    },
-    {
-      id: 3,
-      value: "Outlet C",
-    },
-  ];
-
   return (
-    <Card title="Add Merchandiser" loading={false} className="add-merchandiser">
+    <Card
+      title="Add Merchandiser"
+      loading={isLoading}
+      className="add-merchandiser"
+    >
       <Row justify={"center"}>
         <Col span={12}>
           <Form
@@ -80,12 +86,23 @@ function AddMerchandiser() {
             >
               <Input />
             </Form.Item>
-            <Form.Item label="Outlets" name="outlets" rules={requiredFieldRule}>
-              <Select mode="multiple" placeholder="Select Outlets">
-                {outletArray.map((outlet) => (
-                  <Option key={outlet.id} value={outlet.id}>
-                    {outlet.value}
-                  </Option>
+            <Form.Item
+              label="Outlets"
+              name="outlet_ids"
+              rules={requiredFieldRule}
+            >
+              <Select
+                mode="multiple"
+                placeholder={
+                  outletsLoading ? "Loading Outlets..." : "Select Outlets"
+                }
+                loading={outletsLoading}
+                disabled={outletsLoading || outletsError}
+              >
+                {outlets?.map((outlet) => (
+                  <Select.Option key={outlet.id} value={outlet.id}>
+                    {outlet.name}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>

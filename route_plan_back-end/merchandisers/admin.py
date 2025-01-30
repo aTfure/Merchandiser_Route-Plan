@@ -1,5 +1,6 @@
 from django.contrib import admin
-from merchandisers.models import Merchandiser, OutletMerchandiser
+from merchandisers.models import Merchandiser
+from outlets.models import Outlet
 
 
 class BaseAdminMixin:
@@ -13,11 +14,21 @@ class MerchandiserAdmin(BaseAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'full_name', 'email', 'phone_number', 'created')
     list_display_links = ('full_name',)
 
-@admin.register(OutletMerchandiser)
-class OutletMerchandiserAdmin(BaseAdminMixin, admin.ModelAdmin):
-    def get_list_display(self, request):
-        if 'merchandiser_id_exact' in request.GET:
-            return ['id', 'manager', 'date_time', 'outlet', 'channel_type']
-        return ['id', 'merchandiser']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('assigned_outlets')
     
-    list_display_links = ('merchandiser',)
+    def assigned_outlet_count(self, obj):
+        return obj.assigned_outlets.count()
+    assigned_outlet_count.short_description = 'Assigned Outlets'
+
+
+class OutletInline(admin.TabularInline):
+    model = Outlet
+    fields = ('name', 'location', 'channel_type', 'assigned_date')
+    extra = 0
+    verbose_name = 'Assigned Outlet'
+    verbose_name_plural = 'Assigned Outlets'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('channel_type')

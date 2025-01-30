@@ -1,6 +1,7 @@
 import { Table } from "antd";
 import React, { useState } from "react";
 import useActionMenu from "../action-menu/ActionMenu";
+import { data } from "react-router-dom";
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE_NUMBER = 0;
@@ -25,6 +26,7 @@ function useDataTable({ columns, dataSource, updateEntityPath }) {
     ...columns,
     {
       title: "Action",
+      dataIndex: "action",
       key: "action",
       render: () => actionColumnView,
     },
@@ -47,7 +49,7 @@ function useDataTable({ columns, dataSource, updateEntityPath }) {
         rowKey={(record) => record.id}
         rowSelection={rowSelection}
         columns={updatedColumns}
-        dataSource={dataSource?.content}
+        dataSource={dataSource?.content || dataSource}
         onRow={(record) => {
           return {
             onClick: () => {
