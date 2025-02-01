@@ -1,84 +1,131 @@
+// Action Menu Component to make it generic and reusable across different CRUD operations while maintaining proper Intergrations
+
 import {
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
+  EyeOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Menu, message, Popconfirm } from "antd";
+import { Dropdown, Menu, message, Popconfirm, Space } from "antd";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useDeleteMerchandiserMutation } from "../../redux/slices/merchandiserSlice";
+import PropTypes from "prop-types";
+import "./ActionMenu.scss";
 
-function useActionMenu({ selectedRow, updateEntityPath }) {
-  const [deleteMerchandiser] = useDeleteMerchandiserMutation();
+const ActionMenu = ({
+  selectedRow,
+  entityType,
+  onDelete,
+  updateEntityPath,
+  additionalActions = [],
+}) => {
   const navigate = useNavigate();
 
-  const action = [
+  console.log("Selected Row ID:", selectedRow.id); // Check if ID exists
+  console.log("Update Path:", updateEntityPath); // Should be "/merchandiser/edit"
+  const { id } = selectedRow;
+
+  const baseActions = [
     {
       key: "edit",
       icon: <EditOutlined />,
-      text: "Update",
+      text: "Edit",
+      onClick: () => navigate(`${updateEntityPath}/${id}/edit`),
+      visible: true,
     },
     {
       key: "delete",
       icon: <DeleteOutlined />,
       text: "Delete",
+      danger: true,
+      visible: true,
     },
+    ...additionalActions,
   ];
 
-  const handleMenuClick = ({ key }) => {
-    if (key === "edit") {
-      const updatePath = `/${updateEntityPath}/${selectedRow.id}`;
-      navigate(updatePath);
-    }
-  };
-
-  const handleSingleDelete = async () => {
+  const handleDelete = async () => {
     try {
-      await deleteMerchandiser(selectedRow.id).unwrap();
-      message.success("Merchandiser deleted!");
+      await onDelete(id).unwrap();
+      message.success(`${entityType} deleted successfully!`);
     } catch (err) {
-      message.error("Deletion failed!");
+      message.error(`Failed to delete ${entityType}: {err.message}`);
     }
   };
 
-  const actionMenu = (
-    <Menu onClick={handleMenuClick}>
-      {action.map((item) => {
-        if (item.key === "delete") {
-          return (
-            <Menu.Item key={item.key} icon={item.icon}>
-              <Popconfirm
-                title="Are you sure you want to delete?"
-                placement="left"
-                icon={<QuestionCircleOutlined style={{ color: "red" }} />}
-                onConfirm={handleSingleDelete}
-              >
-                {item.text}
-              </Popconfirm>
-            </Menu.Item>
-          );
-        }
-        return (
-          <Menu.Item key={item.key} icon={item.icon}>
-            {item.text}
-          </Menu.Item>
-        );
-      })}
-    </Menu>
+  const menuItems = baseActions
+    .filter((action) => action.visible)
+    .map((action) => {
+      if (action.key === "delete") {
+        return {
+          key: action.key,
+          label: (
+            <Popconfirm
+              title={`Delete ${entityType}?`}
+              icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+              onConfirm={handleDelete}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Space className={action.danger ? "danger-action" : ""}>
+                {action.icon}
+                {action.text}
+              </Space>
+            </Popconfirm>
+          ),
+          disabled: action.disabled,
+        };
+      }
+
+      return {
+        key: action.key,
+        label: (
+          <Space
+            onClick={action.onClick}
+            className={action.danger ? "danger-action" : ""}
+          >
+            {action.icon}
+            {action.text}
+          </Space>
+        ),
+        disabled: action.disabled,
+      };
+    });
+
+  return (
+    <Dropdown
+      menu={{ items: menuItems }}
+      trigger={["click"]}
+      overlayClassName="action-menu"
+    >
+      <a className="action-menu-trigger" onClick={(e) => e.preventDefault()}>
+        <Space>
+          Actions
+          <DownOutlined className="action-menu-chevron" />
+        </Space>
+      </a>
+    </Dropdown>
   );
+};
 
-  const actionColumnView = (
-    <span className="action-menu">
-      <Dropdown overlay={actionMenu}>
-        <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-          Action <DownOutlined />
-        </a>
-      </Dropdown>
-    </span>
-  );
+ActionMenu.propTypes = {
+  selectedRow: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  entityType: PropTypes.string.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  updateEntityPath: PropTypes.string.isRequired,
+  additionalActions: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      icon: PropTypes.node,
+      text: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+      visible: PropTypes.bool,
+      danger: PropTypes.bool,
+      disabled: PropTypes.bool,
+    })
+  ),
+};
 
-  return [actionColumnView];
-}
-
-export default useActionMenu;
+export default ActionMenu;

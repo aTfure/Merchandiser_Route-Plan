@@ -15,7 +15,6 @@ function Header({ addNewPath, hasSelected, handleSearch }) {
 
   const handleAddNew = () => {
     navigate("/" + addNewPath);
-    s;
   };
   return (
     <>

@@ -86,13 +86,13 @@ const SiderMenu = ({ handleOnCollapse, collapsed }) => {
 
   const handleMenuClick = ({ key }) => {
     const routes = {
-      dashboard: "/",
+      dashboard: "/dashboard",
       showMerchandisers: "/merchandisers",
-      addMerchandiser: "/add-merchandiser",
+      addMerchandiser: "merchandisers/create",
       showOutlets: "/outlets",
-      addOutlet: "/add-outlet",
+      addOutlet: "outlets/create",
       showChannels: "/channels",
-      addChannel: "/add-channel",
+      addChannel: "channels/create",
       settings: "/settings",
     };
     navigate(routes[key] || "/");

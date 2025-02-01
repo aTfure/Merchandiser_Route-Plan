@@ -4,13 +4,47 @@ import useDataTable from "../../../components/data-table/DataTable";
 import * as constants from "../../../components/constants/Merchandiser";
 import {
   useBulkDeleteMerchandisersMutation,
+  useDeleteMerchandiserMutation,
   useGetAllMerchandisersQuery,
 } from "../../../redux/slices/merchandiserSlice";
-import { message } from "antd";
+import ActionMenu from "../../../components/action-menu/ActionMenu";
+import { useNavigate } from "react-router-dom";
+import { EyeOutlined } from "@ant-design/icons";
 
 function ViewMerchandisers() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const navigate = useNavigate();
+  const { DataTable, currentPage, pageSize, selectedRowKeys } = useDataTable();
+  const [deleteMerchandiser] = useDeleteMerchandiserMutation();
+
+  const hasSelected = selectedRowKeys.length > 0;
+
+  // View Action
+  const additionalActions = [
+    {
+      key: "view",
+      icon: <EyeOutlined />,
+      text: "View Details",
+      onclick: (id) => navigate(`/merchandisers/${id}/view`),
+    },
+  ];
+
+  // Action column addes to base column
+  const tableColumns = [
+    ...constants.columns,
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <ActionMenu
+          selectedRow={record}
+          entityType="Merchandiser"
+          onDelete={deleteMerchandiser}
+          updateEntityPath="/merchandisers"
+          additionalActions={additionalActions}
+        />
+      ),
+    },
+  ];
 
   const {
     data: merchandisers,
@@ -21,35 +55,15 @@ function ViewMerchandisers() {
     size: pageSize,
   });
 
-  const [bulkDelete] = useBulkDeleteMerchandisersMutation();
-
-  const handleBulkDelete = async (selectedIds) => {
-    try {
-      await bulkDelete(selectedIds).unwrap();
-      message.success("Selected Merchandisers deleted successfully");
-    } catch (err) {
-      message.error("Failed to delete  merchandisers");
-    }
-  };
-  console.log(merchandisers);
-
-  const { DataTable, hasSelected, selectedRow, resetPagination } = useDataTable(
-    {
-      columns: constants.columns,
-      dataSource: merchandisers,
-      updateEntityPath: "update-merchandiser",
-      loading: isLoading,
-      onBulkDelete: handleBulkDelete,
-    }
-  );
-  if (error) {
-    message.error("Failed to fetch merchandisers");
-  }
   return (
     <div className="view-merchandisers">
-      <Header addNewPath={"add-merchandiser"} hasSelected={hasSelected} />
+      <Header addNewPath={"merchandisers/create"} hasSelected={hasSelected} />
       <div className="table-container">
-        <DataTable />
+        <DataTable
+          columns={tableColumns}
+          dataSource={merchandisers}
+          loading={isLoading}
+        />
       </div>
     </div>
   );

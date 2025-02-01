@@ -21,7 +21,7 @@ class MerchandiserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Merchandiser
-        fields = ['full_name', 'phone_number', 'email', 'assigned_outlets', 'outlet_ids']
+        fields = ['id', 'first_name', 'last_name', 'full_name', 'phone_number', 'email', 'assigned_outlets', 'outlet_ids']
 
     def create(self, validated_data):
         outlets_ids = validated_data.pop('outlet_ids', [])

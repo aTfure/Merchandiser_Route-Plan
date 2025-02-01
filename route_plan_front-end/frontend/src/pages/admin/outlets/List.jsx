@@ -1,12 +1,30 @@
 import React, { useState } from "react";
 import Header from "../../../components/header/Header";
 import useDataTable from "../../../components/data-table/DataTable";
+import useActionMenu from "../../../components/action-menu/ActionMenu";
 import * as constants from "../../../components/constants/Outlet";
 import { useGetAllOutletsQuery } from "../../../redux/slices/outletSlice";
 import { message } from "antd";
 function ShowOutlets() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const { DataTable, currentPage, pageSize, selectedRowKeys } = useDataTable();
+
+  const hasSelected = selectedRowKeys.length > 0;
+
+  const tableColumns = [
+    ...constants.columns,
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <useActionMenu
+          selectedRow={record}
+          entityType="Outlet"
+          // onDelete={deleteOutlet}
+          updateEntityPath="outlet/edit"
+        />
+      ),
+    },
+  ];
 
   const {
     data: outlets,
@@ -19,13 +37,6 @@ function ShowOutlets() {
 
   console.log(outlets);
 
-  const { DataTable, hasSelected, resetPagination } = useDataTable({
-    columns: constants.columns,
-    dataSource: outlets,
-    loading: isLoading,
-    updateEntityPath: "update-outlet",
-  });
-
   if (error) {
     message.error("Failed to fetch outlets");
   }
@@ -33,7 +44,12 @@ function ShowOutlets() {
     <div className="view-outlets">
       <Header addNewPath={"add-outlet"} hasSelected={hasSelected} />
       <div className="table-container">
-        <DataTable />
+        <DataTable
+          columns={tableColumns}
+          dataSource={outlets}
+          loading={isLoading}
+          scroll={{ x: 1300 }}
+        />
       </div>
     </div>
   );

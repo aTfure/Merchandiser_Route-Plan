@@ -1,7 +1,7 @@
 import { Button, Card, Form, Input, message, Row, Select } from "antd";
 import { Option } from "antd/es/mentions";
 import React from "react";
-import { useGetAllChannelsQuery } from "../../../redux/slices/channelSlice";
+import { useGetAllChannelTypesQuery } from "../../../redux/slices/channelSlice";
 
 const AddOutlet = () => {
   const [form] = Form.useForm();
@@ -10,7 +10,7 @@ const AddOutlet = () => {
     data: channels,
     isLoading: channelsLoading,
     error: channelsError,
-  } = useGetAllChannelsQuery();
+  } = useGetAllChannelTypesQuery();
 
   console.log(channels);
 

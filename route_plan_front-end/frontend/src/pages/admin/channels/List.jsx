@@ -1,29 +1,38 @@
 import React, { useState } from "react";
 import Header from "../../../components/header/Header";
 import useDataTable from "../../../components/data-table/DataTable";
+import useActionMenu from "../../../components/action-menu/ActionMenu";
 import * as constants from "../../../components/constants/ChannelType";
-import { useGetAllChannelsQuery } from "../../../redux/slices/channelSlice";
+import { useGetAllChannelTypesQuery } from "../../../redux/slices/channelSlice";
 
 function ViewChannels() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const { DataTable, currentPage, pageSize, selectedRowKeys } = useDataTable();
+
+  const hasSelected = selectedRowKeys.length > 0;
+
+  const tableColumns = [
+    ...constants.columns,
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <useActionMenu
+          selectedRow={record}
+          entityType="Channel"
+          // onDelete={deleteChannel}
+          updateEntityPath="channel/edit"
+        />
+      ),
+    },
+  ];
 
   const {
     data: channels,
     isLoading,
     error,
-  } = useGetAllChannelsQuery({
+  } = useGetAllChannelTypesQuery({
     page: currentPage,
     size: pageSize,
-  });
-
-  console.log(channels);
-
-  const { DataTable, hasSelected, resetPagination } = useDataTable({
-    columns: constants.columns,
-    dataSource: channels,
-    loading: isLoading,
-    updateEntityPath: "update-channel",
   });
 
   if (error) {
@@ -34,7 +43,12 @@ function ViewChannels() {
     <div className="view-channels">
       <Header addNewPath={"add-channel"} hasSelected={hasSelected} />
       <div className="table-container">
-        <DataTable />
+        <DataTable
+          columns={tableColumns}
+          dataSource={channels}
+          loading={isLoading}
+          scroll={{ x: 1300 }}
+        />
       </div>
     </div>
   );

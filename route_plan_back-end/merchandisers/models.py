@@ -5,9 +5,9 @@ class Merchandiser(models.Model):
     """
     Profile for Merchandisers
     """
-    first_name = models.CharField(max_length=50, default='Joe')
-    last_name = models.CharField(max_length=50, default='Doe')
-    email = models.EmailField(default='example@email.com')
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     created = models.DateTimeField(default=timezone.now)
 
