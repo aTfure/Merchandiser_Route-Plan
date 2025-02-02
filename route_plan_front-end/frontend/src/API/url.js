@@ -18,7 +18,7 @@ export const URL = {
   MERCHANDISER_BY_ID: (id) => `/api/merchandisers/${id}/`,
 
   // Outlet endpoints
-  OUTLETS: `/api/outlets`,
+  OUTLETS: `/api/outlets/`,
   OUTLET_BY_ID: (id) => `/api/outlets/${id}/`,
   OUTLET_MERCHANDISERS: `/api/outlets-merchandisers/`,
 
