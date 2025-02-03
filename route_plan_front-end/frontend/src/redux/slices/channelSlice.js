@@ -54,7 +54,7 @@ export const ChannelApi = createApi({
     }),
 
     deleteChannelType: builder.mutation({
-      queryFn: async (ids) => {
+      queryFn: async (id) => {
         try {
           const data = await channelRequests.delete(id);
           return { data };

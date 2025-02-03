@@ -61,9 +61,7 @@ const EditMerchandiser = () => {
   }
 
   return (
-    <Card
-      title={`Edit Merchandiser: ${merchandiser.first_name} ${merchandiser.last_name}`}
-    >
+    <Card title={`${merchandiser.first_name} ${merchandiser.last_name}`}>
       <MerchandiserForm
         mode="edit"
         initialValues={{

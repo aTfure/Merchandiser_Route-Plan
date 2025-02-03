@@ -49,7 +49,7 @@ const ActionMenu = ({
       await onDelete(id).unwrap();
       message.success(`${entityType} deleted successfully!`);
     } catch (err) {
-      message.error(`Failed to delete ${entityType}: {err.message}`);
+      message.error(`Failed to delete ${entityType}: ${err.message}`);
     }
   };
 

@@ -38,7 +38,7 @@ function ViewChannels() {
           selectedRow={record}
           entityType="Channel"
           onDelete={deleteChannel}
-          updateEntityPath="channels/"
+          updateEntityPath="/channels"
           additionalActions={additionalActions}
         />
       ),

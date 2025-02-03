@@ -57,7 +57,7 @@ const EditOutlet = () => {
   }
 
   return (
-    <Card title={`Edit Outlet: ${outlet.name} - ${outlet.location}`}>
+    <Card title={`${outlet.name} - ${outlet.location}`}>
       <OutletForm
         mode="edit"
         initialValues={{
