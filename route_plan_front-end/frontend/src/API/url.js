@@ -27,6 +27,11 @@ export const URL = {
   CHANNEL_TYPE_BY_ID: (id) => `/api/channel-types/${id}/`,
 
   // Group endpoints
-  GROUPS: `/api/auth/group`,
+  GROUPS: `/api/auth/group/`,
   GROUP_BY_ID: (id) => `/api/auth/group/${id}/`,
+
+  // Routes endpoints
+  ROUTE: `/api/routes/`,
+  ROUTE_BY_ID: (id) => `/api/routes/${id}/`,
+  ADD_OUTLETS_TO_ROUTE: (id) => `/api/routes/${id}/add_outlets/`,
 };

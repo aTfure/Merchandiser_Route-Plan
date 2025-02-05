@@ -11,6 +11,7 @@ import {
   OrderedListOutlined,
   BranchesOutlined,
   HomeOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import "./SideMenu.scss";
 
@@ -74,6 +75,23 @@ const menuItems = [
     ],
   },
   {
+    key: "routes",
+    icon: <ReloadOutlined />,
+    label: "Routes",
+    children: [
+      {
+        key: "showRoutes",
+        icon: <OrderedListOutlined />,
+        label: "Show Routes",
+      },
+      {
+        key: "addRoute",
+        icon: <PlusOutlined />,
+        label: "Add Route",
+      },
+    ],
+  },
+  {
     key: "settings",
     icon: <SettingOutlined />,
     label: "Settings",
@@ -93,6 +111,8 @@ const SiderMenu = ({ handleOnCollapse, collapsed }) => {
       addOutlet: "outlets/create",
       showChannels: "/channels",
       addChannel: "channels/create",
+      showRoutes: "/routes",
+      addRoute: "routes/create",
       settings: "/settings",
     };
     navigate(routes[key] || "/");

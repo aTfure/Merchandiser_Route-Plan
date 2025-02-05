@@ -20,6 +20,10 @@ import ViewChannels from "./pages/admin/channels/List";
 import AddChannel from "./pages/admin/channels/Add";
 import EditChannel from "./pages/admin/channels/Edit";
 import ViewChannelDetails from "./pages/admin/channels/View";
+import ViewRoutes from "./pages/admin/routes/List";
+import AddRoute from "./pages/admin/routes/Add";
+import EditRoute from "./pages/admin/routes/Edit";
+import ViewRouteDetails from "./pages/admin/routes/View";
 
 const router = createBrowserRouter([
   {
@@ -110,6 +114,34 @@ const router = createBrowserRouter([
               {
                 path: "view",
                 element: <ViewChannelDetails />,
+              },
+            ],
+          },
+        ],
+      },
+
+      // Route Routes
+      {
+        path: "routes",
+        children: [
+          {
+            index: true,
+            element: <ViewRoutes />,
+          },
+          {
+            path: "create",
+            element: <AddRoute />,
+          },
+          {
+            path: ":id",
+            children: [
+              {
+                path: "edit",
+                element: <EditRoute />,
+              },
+              {
+                path: "view",
+                element: <ViewRouteDetails />,
               },
             ],
           },

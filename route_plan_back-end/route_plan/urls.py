@@ -20,6 +20,7 @@ from rest_framework.routers import DefaultRouter
 from users.views import LoginView
 from merchandisers.views import MerchandiserViewSet
 from outlets.views import OutletViewSet, ChannelTypeViewSet
+from routes.views import RouteViewSet
 
 
 
@@ -28,6 +29,7 @@ router = DefaultRouter()
 router.register(r'outlets', OutletViewSet)
 router.register(r'channel-types', ChannelTypeViewSet)
 router.register(r'merchandisers', MerchandiserViewSet)
+router.register(r'routes', RouteViewSet, basename='route')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

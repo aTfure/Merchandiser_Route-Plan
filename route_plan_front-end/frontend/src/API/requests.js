@@ -47,3 +47,13 @@ export const channelRequests = {
   update: (id, data) => httpClient.patch(URL.CHANNEL_TYPE_BY_ID(id), data),
   delete: (id) => httpClient.delete(URL.CHANNEL_TYPE_BY_ID(id)),
 };
+
+// Route Requests
+export const routeRequests = {
+  getAll: (params) => httpClient.get(URL.ROUTE, { params }),
+  getById: (id) => httpClient.get(URL.ROUTE_BY_ID(id)),
+  create: (data) => httpClient.post(URL.ROUTE, data),
+  update: (id, data) => httpClient.patch(URL.ROUTE_BY_ID(id), data),
+  delete: (id) => httpClient.delete(URL.ROUTE_BY_ID(id)),
+  addOutlets: (id, data) => httpClient.post(URL.ADD_OUTLETS_TO_ROUTE(id), data),
+};
