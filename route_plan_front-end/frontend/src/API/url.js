@@ -34,4 +34,7 @@ export const URL = {
   ROUTE: `/api/routes/`,
   ROUTE_BY_ID: (id) => `/api/routes/${id}/`,
   ADD_OUTLETS_TO_ROUTE: (id) => `/api/routes/${id}/add_outlets/`,
+
+  // Emails
+  ROUTE_RESEND_EMAIL: (id) => `/api/routes/${id}/resend-email/`,
 };

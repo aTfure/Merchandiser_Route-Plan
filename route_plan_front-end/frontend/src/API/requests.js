@@ -56,4 +56,5 @@ export const routeRequests = {
   update: (id, data) => httpClient.patch(URL.ROUTE_BY_ID(id), data),
   delete: (id) => httpClient.delete(URL.ROUTE_BY_ID(id)),
   addOutlets: (id, data) => httpClient.post(URL.ADD_OUTLETS_TO_ROUTE(id), data),
+  resendRouteEmail: (id) => httpClient.post(URL.ROUTE_RESEND_EMAIL(id)),
 };

@@ -5,16 +5,19 @@ import * as constants from "../../../components/constants/Route";
 import {
   useDeleteRouteMutation,
   useGetAllRoutesQuery,
+  useResendRouteEmailMutation,
 } from "../../../redux/slices/routeSlice";
 import ActionMenu from "../../../components/action-menu/ActionMenu";
 import { useNavigate } from "react-router-dom";
-import { EyeOutlined } from "@ant-design/icons";
+import { ApiFilled, EyeOutlined } from "@ant-design/icons";
+import { message } from "antd";
 
 function ViewRoutes() {
   const navigate = useNavigate();
   const { DataTable, currentPage, pageSize, selectedRowKeys } = useDataTable();
   const [deleteRoute] = useDeleteRouteMutation();
   const hasSelected = selectedRowKeys.length > 0;
+  const [resendRouteEmail] = useResendRouteEmailMutation();
 
   // View Action
   const additionalActions = [
@@ -37,6 +40,14 @@ function ViewRoutes() {
           onDelete={deleteRoute}
           updateEntityPath="/routes"
           additionalActions={additionalActions}
+          onResendEmail={async (row) => {
+            try {
+              await resendRouteEmail(row.id).unwrap();
+              message.success("Notification email resent successfully");
+            } catch (error) {
+              message.error("Failed to resend email notification");
+            }
+          }}
         />
       ),
     },

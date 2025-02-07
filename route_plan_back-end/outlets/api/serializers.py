@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from outlets.models import Outlet, ChannelType
 from merchandisers.models import Merchandiser
 
@@ -16,17 +17,6 @@ class OutletSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True
     )
-    merchandiser_id = serializers.PrimaryKeyRelatedField(
-        queryset=Merchandiser.objects.all(),
-        source='merchandiser',
-        allow_null=True,
-        required=False,
-        write_only=True
-    )
-    merchandiser = serializers.CharField(
-        source='merchandiser.full_name',
-        read_only=True
-    )
 
     channel_type = serializers.CharField(
         source='channel_type.name',
@@ -39,8 +29,11 @@ class OutletSerializer(serializers.ModelSerializer):
             'name',
             'location',
             'channel_type_id',
-            'channel_type',
-            'merchandiser_id',
-            'merchandiser',
-            'assigned_date'
+            'channel_type'
         ]
+
+class OutletGeoSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Outlet
+        geo_field = 'location'
+        fields = ('id', 'name', 'channel_type')

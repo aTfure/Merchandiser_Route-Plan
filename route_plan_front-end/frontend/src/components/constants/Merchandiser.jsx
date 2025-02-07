@@ -18,19 +18,19 @@ export const columns = [
     key: "email",
   },
   {
-    title: "Outlets",
-    key: "outlets",
-    dataIndex: "assigned_outlets",
-    render: (assignedOutlets) => (
+    title: "Route",
+    key: "routes",
+    dataIndex: "routes",
+    render: (routes) => (
       <>
-        {assignedOutlets && assignedOutlets.length > 0 ? (
-          assignedOutlets.map((outlet) => (
-            <Tag color="blue" key={outlet.id}>
-              {outlet.name}
+        {routes && routes.length > 0 ? (
+          routes.map((route) => (
+            <Tag color="blue" key={route.id}>
+              {route.name}
             </Tag>
           ))
         ) : (
-          <span>No outlets assigned</span>
+          <span>No route assigned</span>
         )}
       </>
     ),

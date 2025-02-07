@@ -3,6 +3,7 @@ from outlets.models import Outlet
 
 class Route(models.Model):
     """Represents a collection of outlets in specific order"""
+    merchandiser = models.ForeignKey('merchandisers.Merchandiser', on_delete=models.SET_NULL, null=True, blank=True, related_name='routes')
     name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

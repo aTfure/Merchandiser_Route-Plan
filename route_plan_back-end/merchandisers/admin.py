@@ -15,12 +15,12 @@ class MerchandiserAdmin(BaseAdminMixin, admin.ModelAdmin):
     list_display_links = ('full_name',)
 
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('assigned_outlets')
+    # def get_queryset(self, request):
+    #     return super().get_queryset(request).prefetch_related('assigned_outlets')
     
-    def assigned_outlet_count(self, obj):
-        return obj.assigned_outlets.count()
-    assigned_outlet_count.short_description = 'Assigned Outlets'
+    # def assigned_outlet_count(self, obj):
+    #     return obj.assigned_outlets.count()
+    # assigned_outlet_count.short_description = 'Assigned Outlets'
 
 
 class OutletInline(admin.TabularInline):

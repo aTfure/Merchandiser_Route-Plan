@@ -3,7 +3,6 @@ import Header from "../../../components/header/Header";
 import useDataTable from "../../../components/data-table/DataTable";
 import * as constants from "../../../components/constants/Merchandiser";
 import {
-  useBulkDeleteMerchandisersMutation,
   useDeleteMerchandiserMutation,
   useGetAllMerchandisersQuery,
 } from "../../../redux/slices/merchandiserSlice";

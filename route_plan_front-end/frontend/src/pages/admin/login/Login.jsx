@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../../redux/slices/authApi";
-import { Button, Card, Form, Input, message } from "antd";
+import { Button, Card, Col, Form, Input, message, Row } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { setCredentials } from "../../../redux/slices/authSlice";
 
@@ -24,56 +24,61 @@ const Login = () => {
           refreshToken: result.refresh_token,
         })
       );
-      message.success("Login sucessful");
-      navigate("/dashboard");
+      message.success("Login successful");
+      navigate("/");
     } catch (err) {
       message.error(
-        "Failed to login: " + (err.date?.message || "Unknown error")
+        "Failed to login: " + (err.data?.message || "Unknown error")
       );
     }
   };
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <Card title="Login" className="w-full max-w-md">
-        <Form name="login" onFinish={onFinish} layout="vertical">
-          <Form.Item
-            name="email"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Please enter a valid email!" },
-            ]}
+    <Row justify="center" align="middle" style={{ minHeight: "100vh" }}>
+      <Col xs={22} sm={16} md={12} lg={8} xl={6}>
+        <Card title="Login" className="login-form">
+          <Form
+            name="login"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
           >
-            <Input prefix={<UserOutlined />} placeholder="Email" size="large" />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Password"
-              size="large"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isLoading}
-              className="w-full"
-              size="large"
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: "Please input your Email!" },
+                { type: "email", message: "Please enter a valid Email!" },
+              ]}
             >
-              Log in
-            </Button>
-          </Form.Item>
-          <div className="text-center">
-            <a href="/forgot-password">Forgot Password?</a>
-          </div>
-        </Form>
-      </Card>
-    </div>
+              <Input
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Email"
+              />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: "Please input your Password!" },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                placeholder="Password"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={isLoading}
+                block
+              >
+                Log in
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 

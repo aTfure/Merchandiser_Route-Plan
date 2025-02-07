@@ -78,6 +78,17 @@ export const RouteApi = createApi({
       },
       invalidatesTags: ["Route"],
     }),
+
+    resendRouteEmail: builder.mutation({
+      queryFn: async (id) => {
+        try {
+          const data = await routeRequests.resendRouteEmail(id);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+    }),
   }),
 });
 
@@ -88,4 +99,5 @@ export const {
   useUpdateRouteMutation,
   useDeleteRouteMutation,
   useAddOutletsToRouteMutation,
+  useResendRouteEmailMutation,
 } = RouteApi;

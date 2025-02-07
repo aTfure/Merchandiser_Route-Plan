@@ -27,7 +27,7 @@ import ViewRouteDetails from "./pages/admin/routes/View";
 
 const router = createBrowserRouter([
   {
-    path: "/auth/log-in",
+    path: "login",
     element: <Login />,
   },
   {

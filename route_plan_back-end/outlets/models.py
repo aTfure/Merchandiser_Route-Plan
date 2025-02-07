@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.gis.db import models
 
 class ChannelType(models.Model):
     name = models.CharField(max_length=100)
@@ -12,10 +13,8 @@ class ChannelType(models.Model):
 
 class Outlet(models.Model):
     name = models.CharField(max_length=100)
-    location = models.CharField(max_length=200)
+    location = models.PointField(srid=4326)
     channel_type = models.ForeignKey(ChannelType, on_delete=models.CASCADE)
-    merchandiser = models.ForeignKey('merchandisers.Merchandiser', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_outlets')
-    assigned_date = models.DateTimeField(default=timezone.now)
 
     
     def __str__(self):

@@ -1,10 +1,8 @@
-// Action Menu Component to make it generic and reusable across different CRUD operations while maintaining proper Intergrations
-
 import {
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
-  EyeOutlined,
+  MailOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, message, Popconfirm, Space } from "antd";
@@ -19,13 +17,12 @@ const ActionMenu = ({
   onDelete,
   updateEntityPath,
   additionalActions = [],
+  onResendEmail,
 }) => {
   const navigate = useNavigate();
-
-  console.log("Selected Row ID:", selectedRow.id); // Check if ID exists
-  console.log("Update Path:", updateEntityPath); // Should be "/merchandiser/edit"
   const { id } = selectedRow;
 
+  // Base actions with consistent structure
   const baseActions = [
     {
       key: "edit",
@@ -41,19 +38,38 @@ const ActionMenu = ({
       danger: true,
       visible: true,
     },
+  ];
+
+  // Conditionally add email action if onResendEmail is provided
+  const emailAction = onResendEmail
+    ? [
+        {
+          key: "send-email",
+          icon: <MailOutlined />,
+          text: "Resend Notification",
+          onClick: () => onResendEmail(selectedRow),
+          visible: true,
+        },
+      ]
+    : [];
+
+  // Combine base actions with additional and email actions
+  const combinedActions = [
+    ...baseActions,
+    ...emailAction,
     ...additionalActions,
   ];
 
   const handleDelete = async () => {
     try {
-      await onDelete(id).unwrap();
+      await onDelete(id);
       message.success(`${entityType} deleted successfully!`);
     } catch (err) {
       message.error(`Failed to delete ${entityType}: ${err.message}`);
     }
   };
 
-  const menuItems = baseActions
+  const menuItems = combinedActions
     .filter((action) => action.visible)
     .map((action) => {
       if (action.key === "delete") {
@@ -126,6 +142,7 @@ ActionMenu.propTypes = {
       disabled: PropTypes.bool,
     })
   ),
+  onResendEmail: PropTypes.func,
 };
 
 export default ActionMenu;

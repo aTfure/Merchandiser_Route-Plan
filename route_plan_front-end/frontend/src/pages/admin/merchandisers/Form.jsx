@@ -17,8 +17,8 @@ import {
   useCreateMerchandiserMutation,
   useUpdateMerchandiserMutation,
 } from "../../../redux/slices/merchandiserSlice";
-import { useGetAllOutletsQuery } from "../../../redux/slices/outletSlice";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { useGetAllRoutesQuery } from "../../../redux/slices/routeSlice";
 
 const MerchandiserForm = ({ initialValues, mode = "add" }) => {
   const [form] = Form.useForm();
@@ -30,10 +30,10 @@ const MerchandiserForm = ({ initialValues, mode = "add" }) => {
     useUpdateMerchandiserMutation();
 
   const {
-    data: outlets,
-    isLoading: outletsLoading,
-    error: outletsError,
-  } = useGetAllOutletsQuery();
+    data: routes,
+    isLoading: routesLoading,
+    error: routesError,
+  } = useGetAllRoutesQuery();
 
   useEffect(() => {
     if (initialValues) {
@@ -110,22 +110,18 @@ const MerchandiserForm = ({ initialValues, mode = "add" }) => {
             >
               <Input />
             </Form.Item>
-            <Form.Item
-              label="Outlet"
-              name="outlet_ids"
-              rules={requiredFieldRule}
-            >
+            <Form.Item label="Route" name="route_ids">
               <Select
                 mode="multiple"
                 placeholder={
-                  outletsLoading ? "Loading Outlets..." : "Select Outlets"
+                  routesLoading ? "Loading Outlets..." : "Select Outlets"
                 }
-                loading={outletsLoading}
-                disabled={outletsLoading || outletsError}
+                loading={routesLoading}
+                disabled={routesLoading || routesError}
               >
-                {outlets?.map((outlet) => (
-                  <Select.Option key={outlet.id} value={outlet.id}>
-                    {outlet.name}
+                {routes?.map((route) => (
+                  <Select.Option key={route.id} value={route.id}>
+                    {route.name}
                   </Select.Option>
                 ))}
               </Select>
