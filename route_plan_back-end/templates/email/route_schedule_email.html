@@ -50,8 +50,8 @@
           <li>
             {{ schedule.start_date|date:"d M Y" }} {% if schedule.end_date %} -
             {{ schedule.end_date|date:"d M Y" }}{% endif %}, {{
-            at.start_time|time:"g:i A" }} - {{ at.end_time|time:"g:i A" }} (Day
-            {{ at.day_of_week }})
+            at.start_time|time:"g:i A" }} - {{ at.end_time|time:"g:i A" }} ({{
+            at.get_day_of_week_display }})
           </li>
           {% endfor %}
         </ul>

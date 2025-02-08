@@ -40,51 +40,42 @@ class RouteScheduleViewSet(viewsets.ModelViewSet):
     queryset = RouteSchedule.objects.all()
     serializer_class = RouteScheduleSerializer
 
-    def perform_create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            route_schedule = serializer.save()
-            send_schedule_notification(route_schedule)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_update(self, request, pk=None):
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        send_schedule_notification(instance)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
-        if serializer.is_valid():
-            route_schedule = serializer.save()
-            send_schedule_notification(route_schedule)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        send_schedule_notification(instance)
 
     @action(detail=True, methods=['POST'], url_path='resend-email')
     def resend_email(self, request, pk=None):
         try:
             schedule = self.get_object()
-            route = schedule.route
-
-            if not route.merchandiser or not route.merchandser.email:
+            if not schedule.route.merchandiser or not schedule.route.merchandiser.email:
                 return Response(
-                    {'error': 'No merchandiser assigned to this route'},
+                    {'error': 'No merchandiser assigned to this route or email missing'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Resend Email
             send_schedule_notification(schedule)
-
-            return Response(
-                {'message': 'Email resent successfully'},
-                status=status.HTTP_200_OK
-            )
-        
+            return Response({'message': 'Email resent successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class RouteScheduleList(generics.ListCreateAPIView):
     queryset = RouteSchedule.objects.all()
     serializer_class = RouteScheduleSerializer

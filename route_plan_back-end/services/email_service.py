@@ -71,56 +71,48 @@ def create_calendar_event(schedule):
     cal.add('version', '2.0')
     cal.add('calscale', 'GREGORIAN')
 
-    vtimezone = Timezone.from_ical(
-        """BEGIN:VTIMEZONE\r\nTZID:UTC\r\nEND:VTIMEZONE"""
-    )
+    tz = pytz.timezone('UTC')
+    vtimezone = Timezone()
+    vtimezone.add('TZID', 'UTC')
     cal.add_component(vtimezone)
-
-    event = Event()
-    route = schedule.route
-
-    event.add('summary', f'Route Visit: {route.name}')
 
     available_times = schedule.available_time.all()
 
-    start_time = None
-    end_date = None
-    start_time_str = None
-    end_time_str = None
-    
-    if available_times.exists():
-        first_available_time = available_times[0]
-        start_time = first_available_time.start_time
-        end_time = first_available_time.end_time
-        start_time_str = start_time.strftime('%I:%M %p')
-        end_time_str = end_time.strftime('%I:%M %p')
-    else:
-        # Handle the case where no available times are defined
-        print("No available times defined for this schedule!")
-        start_time_str = "No Time Specified"
-        end_time_str = "No Time Specified"
+    for available_time in available_times:
+        event = Event()
+        event.add('summary', f'Route Visit: {schedule.route.name}')
+        
+        day_names = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+        day_of_week = day_names[available_time.day_of_week]
 
-    # Combine date and time into datetime
-    if start_time and end_time:
         start_dt = datetime.combine(
             schedule.start_date,
-            start_time
-        ).replace(tzinfo=pytz.UTC)
-        
-        
-        # Use end_date if available, otherwise use schedule_date
-        end_date = schedule.end_date if schedule.end_date else schedule.start_date
-        
+            available_time.start_time
+        ).replace(tzinfo=tz)
         end_dt = datetime.combine(
-            end_date,
-            end_time
-        ).replace(tzinfo=pytz.UTC)
-        
+            schedule.start_date,
+            available_time.end_time
+        ).replace(tzinfo=tz)
+
         event.add('dtstart', start_dt)
         event.add('dtend', end_dt)
 
+        if schedule.end_date:
+            until_date = datetime.combine(
+                schedule.end_date,
+                available_time.end_time
+            ).replace(tzinfo=tz)
+            rrule = {
+                'FREQ': 'WEEKLY',
+                'BYDAY': day_of_week,
+                'UNTIL': until_date
+            }
+            event.add('rrule', rrule)
+
+        cal.add_component(event)
+
     return {
         'calendar': cal,
-        'start_time_str': start_time_str,
-        'end_time_str': end_time_str
+        'start_time_str': available_times[0].start_time.strftime('%I:%M %p') if available_times else "No Time Specified",
+        'end_time_str': available_times[0].end_time.strftime('%I:%M %p') if available_times else "No Time Specified"
     }
