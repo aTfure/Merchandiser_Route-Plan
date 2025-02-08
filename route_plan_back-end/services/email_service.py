@@ -57,16 +57,32 @@ def send_schedule_notification(schedule: RouteSchedule):
         'content_subtype': 'html'
     }
 
-    days_of_week = sorted(list(set([at.day_of_week for at in schedule.available_time.all()])))
-    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    available_times = schedule.available_time.all()
+    days_of_week = sorted(set(at.day_of_week for at in available_times))
+    day_names_list = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    days_with_info = []
+    for day_num in days_of_week:
+        times_for_day = available_times.filter(day_of_week=day_num)
+        day_info = {
+            'day_name': day_names_list[day_num],
+            'times': []
+        }
+        for at in times_for_day:
+            day_info['times'].append({
+                'start_time': at.start_time,
+                'end_time': at.end_time
+            })
+        days_with_info.append(day_info)
 
     # Render the HTML template
     context = {
         'schedule': schedule,
         'date_range_str': date_range_str,
-        'available_times': schedule.available_time.all(),
-        'days_of_week': days_of_week,
-        'day_names': day_names,
+        'days_with_info': days_with_info,
+        # 'available_times': schedule.available_time.all(),
+        # 'days_of_week': days_of_week,
+        # 'day_names': day_names,
     }
     email_data['body'] = render_to_string('email/route_schedule_email.html', context)
 
