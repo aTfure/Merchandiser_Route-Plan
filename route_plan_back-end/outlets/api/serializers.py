@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from outlets.models import Outlet, ChannelType
 from merchandisers.models import Merchandiser
+from drf_extra_fields.geo_fields import PointField
 
 
 class ChannelTypeSerializer(serializers.ModelSerializer):
@@ -11,6 +12,9 @@ class ChannelTypeSerializer(serializers.ModelSerializer):
 
 
 class OutletSerializer(serializers.ModelSerializer):
+    location = PointField()
+
+    
     channel_type_id = serializers.PrimaryKeyRelatedField(
         queryset=ChannelType.objects.all(),
         source="channel_type",

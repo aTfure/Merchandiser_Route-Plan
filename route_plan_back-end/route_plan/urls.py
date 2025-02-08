@@ -19,8 +19,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from users.views import LoginView
 from merchandisers.views import MerchandiserViewSet
-from outlets.views import OutletViewSet, ChannelTypeViewSet
-from routes.views import RouteViewSet
+from outlets.views import OutletViewSet, ChannelTypeViewSet, OutletMapViewSet
+from routes.views import RouteViewSet, RouteScheduleViewSet, RouteScheduleList, RouteScheduleDetail
+from rest_framework import routers
 
 
 
@@ -30,10 +31,15 @@ router.register(r'outlets', OutletViewSet)
 router.register(r'channel-types', ChannelTypeViewSet)
 router.register(r'merchandisers', MerchandiserViewSet)
 router.register(r'routes', RouteViewSet, basename='route')
+router.register(r'route-schedules', RouteScheduleViewSet, basename='route-schedule')
+router.register(r'map-outlets', OutletMapViewSet, basename='map-outlets')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/login/', LoginView.as_view(), name='login'),
     path('api/auth', include('rest_framework.urls')),
     path('api/', include(router.urls)),
+    # path('route-schedules', RouteScheduleList.as_view(), name='route-schedule-list'),
+    # path('route-schedules/<int:pk>/', RouteScheduleDetail.as_view(), name='route-schedule-detail'),
+    # path('api/routes/<int:pk>/resend_email/', RouteViewSet.as_view({'post': 'resend_email'}), name='route-resend-email'),
 ]

@@ -12,18 +12,19 @@ import {
   Modal,
 } from "antd";
 import { useNavigate } from "react-router-dom";
+import { MailOutlined } from "@ant-design/icons";
 import {
   useCreateRouteMutation,
   useUpdateRouteMutation,
 } from "../../../redux/slices/routeSlice";
 import { useGetAllOutletsQuery } from "../../../redux/slices/outletSlice";
 import { useGetAllMerchandisersQuery } from "../../../redux/slices/merchandiserSlice";
-import { MailOutlined } from "@ant-design/icons";
+import RouteScheduleForm from "./route-schedule/RouteScheduleForm";
 
 const RouteForm = ({ initialValues, mode = "add" }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [currentRoute, setCurrentRoute] = useState(null);
 
   const [createRoute, { isLoading: isCreating }] = useCreateRouteMutation();
@@ -34,11 +35,13 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
 
   useEffect(() => {
     if (initialValues) {
-      form.resetFields();
-      form.setFieldsValue({
+      const formValues = {
         ...initialValues,
         merchandiser_id: initialValues.merchandiser?.id,
-      });
+        outlet_ids:
+          initialValues.route_outlets?.map((ro) => ro.outlet.id) || [],
+      };
+      form.setFieldsValue(formValues);
     }
   }, [initialValues, form]);
 
@@ -46,7 +49,7 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
     try {
       let response;
       const payload = {
-        ...values,
+        name: values.name,
         outlet_ids: values.outlet_ids || [],
         merchandiser_id: values.merchandiser_id,
       };
@@ -63,8 +66,8 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
       message.success(
         `Route ${mode === "edit" ? "updated" : "created"} successfully`
       );
-      setCurrentRoute(response.data);
-      setShowEmailModal(true);
+      setCurrentRoute(response);
+      setShowScheduleModal(true);
     } catch (err) {
       const errorMessage = err.data?.message || `Failed to ${mode} route`;
       message.error(errorMessage);
@@ -72,15 +75,9 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
     }
   };
 
-  const handleEmailSend = async () => {
-    try {
-      // Add API call to resend email if needed
-      message.success("Notification email sent successfully");
-      setShowEmailModal(false);
-      navigate("/routes");
-    } catch (err) {
-      message.error("Failed to send email notification");
-    }
+  const handleScheduleComplete = () => {
+    setShowScheduleModal(false);
+    navigate("/routes");
   };
 
   const requiredFieldRule = [{ required: true, message: "Required Field" }];
@@ -110,7 +107,11 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
                 <Input />
               </Form.Item>
 
-              <Form.Item label="Merchandiser" name="merchandiser_id">
+              <Form.Item
+                label="Merchandiser"
+                name="merchandiser_id"
+                rules={requiredFieldRule}
+              >
                 <Select
                   placeholder="Select Merchandiser"
                   allowClear
@@ -158,52 +159,16 @@ const RouteForm = ({ initialValues, mode = "add" }) => {
       </Card>
 
       <Modal
-        title="Route Assignment Notification"
-        visible={showEmailModal}
-        onCancel={() => setShowEmailModal(false)}
-        footer={[
-          <Button key="back" onClick={() => setShowEmailModal(false)}>
-            Close
-          </Button>,
-          <Button
-            key="send"
-            type="primary"
-            icon={<MailOutlined />}
-            onClick={handleEmailSend}
-          >
-            Send Notification
-          </Button>,
-        ]}
+        title="Schedule Route"
+        open={showScheduleModal}
+        onCancel={() => handleScheduleComplete()}
+        footer={null}
+        width={800}
       >
-        {currentRoute?.merchandiser && (
-          <div className="email-preview">
-            <p>
-              <strong>To:</strong> {currentRoute.merchandiser.email}
-            </p>
-            <p>
-              <strong>Subject:</strong> New Route Assignment:{" "}
-              {currentRoute.name}
-            </p>
-            <div className="email-content">
-              <p>Hello {currentRoute.merchandiser.full_name},</p>
-              <p>You have been assigned to a new route:</p>
-              <ul>
-                <li>
-                  <strong>Route Name:</strong> {currentRoute.name}
-                </li>
-                <li>
-                  <strong>Number of Outlets:</strong>{" "}
-                  {currentRoute.outlets_count}
-                </li>
-                <li>
-                  <strong>Assigned Date:</strong>{" "}
-                  {new Date().toLocaleDateString()}
-                </li>
-              </ul>
-              <p>An ICS calendar invite has been attached to this email.</p>
-            </div>
-          </div>
-        )}
+        <RouteScheduleForm
+          route={currentRoute}
+          onComplete={handleScheduleComplete}
+        />
       </Modal>
     </>
   );

@@ -1,15 +1,17 @@
 import {
+  CalendarOutlined,
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
   MailOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Menu, message, Popconfirm, Space } from "antd";
-import React from "react";
+import { Dropdown, Menu, message, Modal, Popconfirm, Space } from "antd";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import "./ActionMenu.scss";
+import RouteScheduleForm from "../../pages/admin/routes/route-schedule/RouteScheduleForm";
 
 const ActionMenu = ({
   selectedRow,
@@ -20,6 +22,7 @@ const ActionMenu = ({
   onResendEmail,
 }) => {
   const navigate = useNavigate();
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const { id } = selectedRow;
 
   // Base actions with consistent structure
@@ -30,6 +33,13 @@ const ActionMenu = ({
       text: "Edit",
       onClick: () => navigate(`${updateEntityPath}/${id}/edit`),
       visible: true,
+    },
+    {
+      key: "schedule",
+      icon: <CalendarOutlined />,
+      text: "Schedule Route",
+      onClick: () => setShowScheduleModal(true),
+      visible: entityType === "route",
     },
     {
       key: "delete",
@@ -67,6 +77,10 @@ const ActionMenu = ({
     } catch (err) {
       message.error(`Failed to delete ${entityType}: ${err.message}`);
     }
+  };
+  const handleScheduleComplete = () => {
+    setShowScheduleModal(false);
+    // Optionally refresh the routes list
   };
 
   const menuItems = combinedActions
@@ -109,18 +123,30 @@ const ActionMenu = ({
     });
 
   return (
-    <Dropdown
-      menu={{ items: menuItems }}
-      trigger={["click"]}
-      overlayClassName="action-menu"
-    >
-      <a className="action-menu-trigger" onClick={(e) => e.preventDefault()}>
-        <Space>
-          Actions
-          <DownOutlined className="action-menu-chevron" />
-        </Space>
-      </a>
-    </Dropdown>
+    <>
+      <Dropdown
+        menu={{ items: menuItems }}
+        trigger={["click"]}
+        overlayClassName="action-menu"
+      >
+        <a className="action-menu-trigger" onClick={(e) => e.preventDefault()}>
+          <Space>
+            Actions
+            <DownOutlined className="action-menu-chevron" />
+          </Space>
+        </a>
+      </Dropdown>
+
+      <Modal
+        title="Schedule Route"
+        open={showScheduleModal}
+        onCancel={() => setShowScheduleModal(false)}
+        footer={null}
+        width={800}
+      >
+        <RouteScheduleForm routeId={id} onComplete={handleScheduleComplete} />
+      </Modal>
+    </>
   );
 };
 

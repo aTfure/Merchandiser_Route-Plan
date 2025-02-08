@@ -1,6 +1,6 @@
 // src/store/slices/routeSlice.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { routeRequests } from "../../API/requests";
+import { routeRequests, routeScheduleRequests } from "../../API/requests";
 
 export const RouteApi = createApi({
   reducerPath: "routeApi",
@@ -89,6 +89,62 @@ export const RouteApi = createApi({
         }
       },
     }),
+    // Route Schedule Endpoints:
+    getAllRouteSchedules: builder.query({
+      queryFn: async (params) => {
+        try {
+          const data = await routeScheduleRequests.getAll(params);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+      providesTags: ["RouteSchedule"],
+    }),
+    getRouteScheduleById: builder.query({
+      queryFn: async (id) => {
+        try {
+          const data = await routeScheduleRequests.getById(id);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+      providesTags: ["RouteSchedule"],
+    }),
+    createRouteSchedule: builder.mutation({
+      queryFn: async (scheduleData) => {
+        try {
+          const data = await routeScheduleRequests.create(scheduleData);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["RouteSchedule"],
+    }),
+    updateRouteSchedule: builder.mutation({
+      queryFn: async ({ id, ...patch }) => {
+        try {
+          const data = await routeScheduleRequests.update(id, patch);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["RouteSchedule"],
+    }),
+    deleteRouteSchedule: builder.mutation({
+      queryFn: async (id) => {
+        try {
+          const data = await routeScheduleRequests.delete(id);
+          return { data };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["RouteSchedule"],
+    }),
   }),
 });
 
@@ -100,4 +156,9 @@ export const {
   useDeleteRouteMutation,
   useAddOutletsToRouteMutation,
   useResendRouteEmailMutation,
+  useGetAllRouteSchedulesQuery,
+  useGetRouteScheduleByIdQuery,
+  useCreateRouteScheduleMutation,
+  useUpdateRouteScheduleMutation,
+  useDeleteRouteScheduleMutation,
 } = RouteApi;

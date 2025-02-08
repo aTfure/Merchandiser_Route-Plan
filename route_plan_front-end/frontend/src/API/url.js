@@ -36,5 +36,8 @@ export const URL = {
   ADD_OUTLETS_TO_ROUTE: (id) => `/api/routes/${id}/add_outlets/`,
 
   // Emails
+
+  ROUTE_SCHEDULES: `/api/route-schedules/`,
+  ROUTE_SCHEDULE_BY_ID: (id) => `api/route-schedules/${id}/`,
   ROUTE_RESEND_EMAIL: (id) => `/api/routes/${id}/resend-email/`,
 };

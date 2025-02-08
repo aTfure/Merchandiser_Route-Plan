@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map Display</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      const map = L.map("map").setView([-1.2921, 36.8219], 13); // Nairobi coordinates
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Load outlets from your API
+      fetch("/api/outlets/map-outlets/")
+        .then((response) => response.json())
+        .then((data) => {
+          data.features.forEach((feature) => {
+            const [lng, lat] = feature.geometry.coordinates;
+            L.marker([lat, lng]).addTo(map).bindPopup(feature.properties.name);
+          });
+        });
+    </script>
+  </body>
+</html>

@@ -58,3 +58,12 @@ export const routeRequests = {
   addOutlets: (id, data) => httpClient.post(URL.ADD_OUTLETS_TO_ROUTE(id), data),
   resendRouteEmail: (id) => httpClient.post(URL.ROUTE_RESEND_EMAIL(id)),
 };
+
+// Route Schedule
+export const routeScheduleRequests = {
+  getAll: (params) => httpClient.get(URL.ROUTE_SCHEDULES, { params }),
+  getById: (id) => httpClient.get(`${URL.ROUTE_SCHEDULES}${id}/`),
+  create: (data) => httpClient.post(URL.ROUTE_SCHEDULES, data),
+  update: (id, data) => httpClient.patch(`${URL.ROUTE_SCHEDULES}${id}/`, data),
+  delete: (id) => httpClient.delete(`${URL.ROUTE_SCHEDULES}${id}/`),
+};
