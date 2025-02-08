@@ -96,7 +96,7 @@ class RouteScheduleSerializer(serializers.ModelSerializer):
         return route_schedule
     
     def update(self, instance, validated_data):
-        available_times_data = validated_data.pop('available_data', [])
+        available_times_data = validated_data.pop('available_time', [])
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -106,9 +106,7 @@ class RouteScheduleSerializer(serializers.ModelSerializer):
         for at_data in available_times_data:
             AvailableTime.objects.create(
                 route_schedule=instance,
-                day_of_week=at_data['day_of_week'],
-                start_time=at_data['start_time'],
-                end_time=at_data['end_time']
+                **at_data
             )
         
         return instance

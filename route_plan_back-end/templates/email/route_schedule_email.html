@@ -1,75 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Route Visit Schedule</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Route Visit Schedule</title>
     <style>
-      /* CSS styling */
-      body {
-        font-family: sans-serif;
-      }
-      .container {
-        width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      .header {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .details {
-        margin-bottom: 20px;
-      }
-      .when {
-        margin-bottom: 20px;
-      }
-      .outlets {
-        margin-bottom: 20px;
-      }
+        /* CSS styling */
+        body {
+            font-family: sans-serif;
+        }
+        .container {
+            width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        .when {
+            margin-bottom: 20px;
+        }
+        .outlets {
+            margin-bottom: 20px;
+        }
     </style>
-  </head>
-  <body>
+</head>  <body>
     <div class="container">
-      <div class="header">
-        <h1>
-          {{ schedule.route.name }} - {{ schedule.start_date|date:"d M Y" }} -
-          Route Plan
-        </h1>
-      </div>
+        <div class="header">
+            <h1>{{ schedule.route.name }} ({{ date_range_str }}) - Route Plan</h1>
+        </div>
+        <div class="details">
+            <p>Hi {{ schedule.route.merchandiser.first_name }},</p>
+            <p>You have been assigned a new route: {{ schedule.route.name }}</p>
+        </div>
 
-      <div class="details">
-        <p>Hi {{ schedule.route.merchandiser.first_name }},</p>
-        <p>You have been assigned a new route: {{ schedule.route.name }}</p>
-      </div>
+        <div class="when">
+            <p>When:</p>
+            <ul>
+                {% for day_num in days_of_week %}
+                    <li>
+                        {{ schedule.start_date|date:"d M Y" }} {% if schedule.end_date %} - {{ schedule.end_date|date:"d M Y" }}{% endif %},
+                        {% for at in available_times %}
+                            {% if at.day_of_week == day_num %}
+                                {{ at.start_time|time:"g:i A" }} - {{ at.end_time|time:"g:i A" }} 
+                            {% endif %}
+                        {% endfor %}
+                        ({{ day_names.day_num }})
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="outlets">
+            <p>Outlets:</p>
+            <ul>
+                {% for outlet in schedule.route.route_outlets.all|dictsort:"order" %}
+                <li>{{ outlet.outlet.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-      <div class="when">
-        <p>When:</p>
-        <ul>
-          {% for at in schedule.available_time.all %}
-          <li>
-            {{ schedule.start_date|date:"d M Y" }} {% if schedule.end_date %} -
-            {{ schedule.end_date|date:"d M Y" }}{% endif %}, {{
-            at.start_time|time:"g:i A" }} - {{ at.end_time|time:"g:i A" }} ({{
-            at.get_day_of_week_display }})
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <div class="outlets">
-        <p>Outlets:</p>
-        <ul>
-          {% for outlet in schedule.route.route_outlets.all|dictsort:"order" %}
-          <li>{{ outlet.outlet.name }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <div class="notes">
-        <p>Notes:</p>
-        <p>{{ schedule.notes|default:"None" }}</p>
-      </div>
+        <div class="notes">
+            <p>Notes:</p>
+            <p>{{ schedule.notes|default:"None" }}</p>
+        </div>
     </div>
-  </body>
+</body>
 </html>

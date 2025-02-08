@@ -41,9 +41,13 @@ def send_schedule_notification(schedule: RouteSchedule):
 
     calendar_data = create_calendar_event(schedule)
 
+    start_date_str = schedule.start_date.strftime("%d %b %Y")
+    end_date_str = schedule.end_date.strftime("%d %b %Y") if schedule.end_date else None
+    date_range_str = f"{start_date_str} - {end_date_str}" if end_date_str else start_date_str
+
     # Email Data
     email_data = {
-        'subject': f'Route Visit Scheduled: {schedule.route.name}',
+        'subject': f'Route Visit Scheduled: {schedule.route.name} ({date_range_str})',
         'to_email': schedule.route.merchandiser.email,
         'attachments': [{
             'filename': 'route_schedule.ics',
@@ -52,14 +56,19 @@ def send_schedule_notification(schedule: RouteSchedule):
         }],
         'content_subtype': 'html'
     }
-    end_date_str = schedule.end_date.strftime("%d %b %Y") if schedule.end_date else None
+
+    days_of_week = sorted(list(set([at.day_of_week for at in schedule.available_time.all()])))
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     # Render the HTML template
-    email_data['body'] = render_to_string('email/route_schedule_email.html', {
+    context = {
         'schedule': schedule,
-        'start_time_str': calendar_data['start_time_str'],
-        'end_time_str': end_date_str,
-    })
+        'date_range_str': date_range_str,
+        'available_times': schedule.available_time.all(),
+        'days_of_week': days_of_week,
+        'day_names': day_names,
+    }
+    email_data['body'] = render_to_string('email/route_schedule_email.html', context)
 
     # Send Email
     return EmailService.send_email(**email_data)
@@ -78,41 +87,43 @@ def create_calendar_event(schedule):
 
     available_times = schedule.available_time.all()
 
-    for available_time in available_times:
-        event = Event()
-        event.add('summary', f'Route Visit: {schedule.route.name}')
+    if not available_times:
+        return {'calendar': cal,'start_time_str': "No Time Specified", 'end_time_str': "No Time Specified"}
+
+    event = Event()
+    event.add('summary', f'Route Visit: {schedule.route.name}')
+
+
+    start_times = [datetime.combine(schedule.start_date, at.start_time).replace(tzinfo=pytz.UTC) for at in available_times]
+    end_times = [datetime.combine(schedule.start_date, at.end_time).replace(tzinfo=pytz.UTC) for at in available_times]
+
+    start_dt = min(start_times)
+    end_dt = max(end_times)
+
+    event.add('dtstart', start_dt)
+    event.add('dtend', end_dt)
+
+    if schedule.end_date:
+        until_date = datetime.combine(schedule.end_date, max([at.end_time for at in available_times])).replace(tzinfo=pytz.UTC)
+
+        day_names = []
+        for at in available_times:
+            day_name = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][at.day_of_week]
+            if day_name not in day_names:
+                day_names.append(day_name)
+
+        rrule = {
+            'freq': 'WEEKLY',
+            'byday': day_names,
+            'until': until_date
+        }
         
-        day_names = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
-        day_of_week = day_names[available_time.day_of_week]
+        event.add('rrule', rrule)  
 
-        start_dt = datetime.combine(
-            schedule.start_date,
-            available_time.start_time
-        ).replace(tzinfo=tz)
-        end_dt = datetime.combine(
-            schedule.start_date,
-            available_time.end_time
-        ).replace(tzinfo=tz)
+    
+    cal.add_component(event)
+    
+    start_time_str = min([at.start_time for at in available_times]).strftime('%I:%M %p')
+    end_time_str = max([at.end_time for at in available_times]).strftime('%I:%M %p')
 
-        event.add('dtstart', start_dt)
-        event.add('dtend', end_dt)
-
-        if schedule.end_date:
-            until_date = datetime.combine(
-                schedule.end_date,
-                available_time.end_time
-            ).replace(tzinfo=tz)
-            rrule = {
-                'FREQ': 'WEEKLY',
-                'BYDAY': day_of_week,
-                'UNTIL': until_date
-            }
-            event.add('rrule', rrule)
-
-        cal.add_component(event)
-
-    return {
-        'calendar': cal,
-        'start_time_str': available_times[0].start_time.strftime('%I:%M %p') if available_times else "No Time Specified",
-        'end_time_str': available_times[0].end_time.strftime('%I:%M %p') if available_times else "No Time Specified"
-    }
+    return {'calendar': cal, 'start_time_str': start_time_str, 'end_time_str': end_time_str}
