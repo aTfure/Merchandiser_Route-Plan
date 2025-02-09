@@ -39,5 +39,5 @@ export const URL = {
 
   ROUTE_SCHEDULES: `/api/route-schedules/`,
   ROUTE_SCHEDULE_BY_ID: (id) => `api/route-schedules/${id}/`,
-  ROUTE_RESEND_EMAIL: (id) => `/api/routes/${id}/resend-email/`,
+  ROUTE_RESEND_EMAIL: (id) => `/api/route-schedules/${id}/resend-email/`,
 };

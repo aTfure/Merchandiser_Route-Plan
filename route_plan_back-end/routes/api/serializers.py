@@ -12,56 +12,6 @@ class RouteOutletSerializer(serializers.ModelSerializer):
         model = RouteOutlet
         fields = ['order', 'outlet']
 
-class RouteSerializer(serializers.ModelSerializer):
-    route_outlets = RouteOutletSerializer(many=True, read_only=True)
-    outlet_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False
-    )
-    merchandiser_id = serializers.PrimaryKeyRelatedField(
-        queryset=Merchandiser.objects.all(),
-        source='merchandiser',
-        write_only=True,
-        allow_null=True,
-        required=False
-    )
-    merchandiser = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Route
-        fields = ['id', 'name', 'merchandiser', 'merchandiser_id', 'outlet_ids', 'route_outlets', 'created_at']
-
-    def create(self, validated_data):
-        outlet_ids = validated_data.pop('outlet_ids', [])
-        route = Route.objects.create(**validated_data)
-        self._update_outlets(route, outlet_ids)
-        return route
-    
-    def update(self, instance, validated_data):
-        outlet_ids = validated_data.pop('outlet_ids', None)
-        new_merchandiser = validated_data.get('merchandiser', instance.merchandiser)
-        
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        
-        if outlet_ids is not None:
-            self._update_outlets(instance, outlet_ids)
-
-        if new_merchandiser != instance.merchandiser and new_merchandiser is not None:
-            send_schedule_notification(new_merchandiser, instance)
-        
-        return instance
-    
-    def _update_outlets(self, route, outlet_ids):
-        RouteOutlet.objects.filter(route=route).delete()
-        route_outlets = [
-            RouteOutlet(route=route, outlet_id=outlet_id, order=index + 1)
-            for index, outlet_id in enumerate(outlet_ids)
-        ]
-        RouteOutlet.objects.bulk_create(route_outlets)
-
 class AvailableTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AvailableTime
@@ -75,7 +25,7 @@ class RouteScheduleSerializer(serializers.ModelSerializer):
         read_only=True
     )
     available_time = AvailableTimeSerializer(many=True, required=False)
-
+    
     class Meta:
         model = RouteSchedule
         fields = '__all__'
@@ -111,3 +61,53 @@ class RouteScheduleSerializer(serializers.ModelSerializer):
         
         return instance
 
+class RouteSerializer(serializers.ModelSerializer):
+    route_outlets = RouteOutletSerializer(many=True, read_only=True)
+    outlet_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+    merchandiser_id = serializers.PrimaryKeyRelatedField(
+        queryset=Merchandiser.objects.all(),
+        source='merchandiser',
+        write_only=True,
+        allow_null=True,
+        required=False
+    )
+    merchandiser = serializers.StringRelatedField(read_only=True)
+    route_schedules = RouteScheduleSerializer(many=True, read_only=True, required=False)
+
+    class Meta:
+        model = Route
+        fields = ['id', 'name', 'merchandiser', 'merchandiser_id', 'outlet_ids', 'route_outlets', 'created_at', 'route_schedules']
+
+    def create(self, validated_data):
+        outlet_ids = validated_data.pop('outlet_ids', [])
+        route = Route.objects.create(**validated_data)
+        self._update_outlets(route, outlet_ids)
+        return route
+    
+    def update(self, instance, validated_data):
+        outlet_ids = validated_data.pop('outlet_ids', None)
+        new_merchandiser = validated_data.get('merchandiser', instance.merchandiser)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        if outlet_ids is not None:
+            self._update_outlets(instance, outlet_ids)
+
+        if new_merchandiser != instance.merchandiser and new_merchandiser is not None:
+            send_schedule_notification(new_merchandiser, instance)
+        
+        return instance
+    
+    def _update_outlets(self, route, outlet_ids):
+        RouteOutlet.objects.filter(route=route).delete()
+        route_outlets = [
+            RouteOutlet(route=route, outlet_id=outlet_id, order=index + 1)
+            for index, outlet_id in enumerate(outlet_ids)
+        ]
+        RouteOutlet.objects.bulk_create(route_outlets)

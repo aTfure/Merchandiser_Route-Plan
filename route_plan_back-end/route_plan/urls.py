@@ -39,7 +39,4 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='login'),
     path('api/auth', include('rest_framework.urls')),
     path('api/', include(router.urls)),
-    # path('route-schedules', RouteScheduleList.as_view(), name='route-schedule-list'),
-    # path('route-schedules/<int:pk>/', RouteScheduleDetail.as_view(), name='route-schedule-detail'),
-    # path('api/routes/<int:pk>/resend_email/', RouteViewSet.as_view({'post': 'resend_email'}), name='route-resend-email'),
 ]

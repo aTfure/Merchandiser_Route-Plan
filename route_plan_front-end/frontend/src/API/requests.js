@@ -56,14 +56,14 @@ export const routeRequests = {
   update: (id, data) => httpClient.patch(URL.ROUTE_BY_ID(id), data),
   delete: (id) => httpClient.delete(URL.ROUTE_BY_ID(id)),
   addOutlets: (id, data) => httpClient.post(URL.ADD_OUTLETS_TO_ROUTE(id), data),
-  resendRouteEmail: (id) => httpClient.post(URL.ROUTE_RESEND_EMAIL(id)),
 };
 
-// Route Schedule
+// Route Schedule requests
 export const routeScheduleRequests = {
   getAll: (params) => httpClient.get(URL.ROUTE_SCHEDULES, { params }),
-  getById: (id) => httpClient.get(`${URL.ROUTE_SCHEDULES}${id}/`),
+  getById: (id) => httpClient.get(URL.ROUTE_SCHEDULE_BY_ID(id)),
   create: (data) => httpClient.post(URL.ROUTE_SCHEDULES, data),
-  update: (id, data) => httpClient.patch(`${URL.ROUTE_SCHEDULES}${id}/`, data),
-  delete: (id) => httpClient.delete(`${URL.ROUTE_SCHEDULES}${id}/`),
+  update: (id, data) => httpClient.patch(URL.ROUTE_SCHEDULE_BY_ID(id), data),
+  delete: (id) => httpClient.delete(URL.ROUTE_SCHEDULE_BY_ID(id)),
+  resendEmail: (id) => httpClient.post(URL.ROUTE_RESEND_EMAIL(id)),
 };

@@ -1,15 +1,57 @@
-from routes.models import RouteSchedule
+from typing import Optional, List, Dict, Any
 from django.core.mail import EmailMessage
 from django.conf import settings
-from icalendar import Calendar, Event, Timezone
-import pytz
-from datetime import datetime, timedelta, time
+import logging
+from dataclasses import dataclass
 from django.template.loader import render_to_string
+from services.calendar_service import create_calendar_event
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+@dataclass
+class EmailAttachment:
+    filename: str
+    content: bytes
+    mimetype: str
+
+class EmailServiceException(Exception):
+    """Custom exception for email service errors"""
+    pass
 
 class EmailService:
     @staticmethod
-    def send_email(subject, body, to_email, attachments=None, content_subtype='plain'):
+    def send_email(
+        subject: str,
+        body: str,
+        to_email: str,
+        attachments: Optional[List[Dict[str, Any]]] = None,
+        content_subtype: str = 'plain'
+    ) -> bool:
+        """
+        Send an email with improved error handling and logging.
+        
+        Args:
+            subject: Email subject
+            body: Email body content
+            to_email: Recipient email address
+            attachments: List of attachment dictionaries
+            content_subtype: Email content type (plain/html)
+            
+        Returns:
+            bool: True if email was sent successfully, False otherwise
+            
+        Raises:
+            EmailServiceException: If there's an error in email configuration
+        """
         try:
+            # Validate inputs
+            if not to_email:
+                raise EmailServiceException("Recipient email address is required")
+            if not subject or not body:
+                raise EmailServiceException("Subject and body are required")
+
+            # Configure email
             email = EmailMessage(
                 subject=subject,
                 body=body,
@@ -18,128 +60,111 @@ class EmailService:
             )
             email.content_subtype = content_subtype
 
+            # Attach files if provided
             if attachments:
                 for attachment in attachments:
-                    email.attach(
-                        attachment['filename'],
-                        attachment['content'],
-                        attachment['mimetype']
-                    )
-            return email.send()
+                    try:
+                        email.attach(
+                            attachment['filename'],
+                            attachment['content'],
+                            attachment['mimetype']
+                        )
+                    except KeyError as ke:
+                        logger.error(f"Invalid attachment format: {ke}")
+                        raise EmailServiceException(f"Invalid attachment format: {ke}")
+                    except Exception as e:
+                        logger.error(f"Error attaching file {attachment.get('filename')}: {str(e)}")
+                        raise EmailServiceException(f"Error attaching file: {str(e)}")
+
+            # Send email
+            sent = email.send()
+            if sent:
+                logger.info(f"Email sent successfully to {to_email}")
+                return True
+            else:
+                logger.error(f"Failed to send email to {to_email}")
+                return False
 
         except Exception as e:
-            print(f'Error sending email: {str(e)}')
+            logger.error(f"Error sending email to {to_email}: {str(e)}")
+            raise EmailServiceException(f"Error sending email: {str(e)}")
+
+def send_schedule_notification(schedule) -> bool:
+    """
+    Send schedule notification with enhanced error handling.
+    
+    Args:
+        schedule: RouteSchedule instance
+        
+    Returns:
+        bool: True if notification was sent successfully, False otherwise
+    """
+    try:
+        # Validate required data
+        if not schedule.route:
+            logger.error("No route associated with schedule")
+            return False
+            
+        merchandiser = schedule.route.merchandiser
+        if not merchandiser or not merchandiser.email:
+            logger.error(f"No merchandiser or email for route {schedule.route.name}")
             return False
 
+        # Prepare calendar data
+        try:
+            calendar_data = create_calendar_event(schedule)
+        except Exception as e:
+            logger.error(f"Error creating calendar event: {str(e)}")
+            return False
 
-def send_schedule_notification(schedule: RouteSchedule):
-    route = schedule.route
-    merchandiser = route.merchandiser
+        # Format dates
+        start_date_str = schedule.start_date.strftime("%d %b %Y")
+        end_date_str = schedule.end_date.strftime("%d %b %Y") if schedule.end_date else None
+        date_range_str = f"{start_date_str} - {end_date_str}" if end_date_str else start_date_str
 
-    if not merchandiser or not merchandiser.email:
+        # Prepare schedule information
+        available_times = schedule.available_time.all()
+        days_of_week = sorted(set(at.day_of_week for at in available_times))
+        day_names_list = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+        days_with_info = []
+        for day_num in days_of_week:
+            if 0 <= day_num < len(day_names_list):
+                times_for_day = available_times.filter(day_of_week=day_num)
+                days_with_info.append({
+                    'day_name': day_names_list[day_num],
+                    'times': [{
+                        'start_time': at.start_time,
+                        'end_time': at.end_time
+                    } for at in times_for_day]
+                })
+
+        # Prepare email content
+        context = {
+            'schedule': schedule,
+            'date_range_str': date_range_str,
+            'days_with_info': days_with_info,
+        }
+
+        try:
+            email_body = render_to_string('email/route_schedule_email.html', context)
+        except Exception as e:
+            logger.error(f"Error rendering email template: {str(e)}")
+            return False
+
+        # Send email
+        return EmailService.send_email(
+            subject=f'Route Visit Scheduled: {schedule.route.name} ({date_range_str})',
+            body=email_body,
+            to_email=merchandiser.email,
+            attachments=[{
+                'filename': 'route_schedule.ics',
+                'content': calendar_data['calendar'].to_ical(),
+                'mimetype': 'text/calendar'
+            }],
+            content_subtype='html'
+        )
+
+    except Exception as e:
+        logger.error(f"Error in send_schedule_notification: {str(e)}")
         return False
-
-    calendar_data = create_calendar_event(schedule)
-
-    start_date_str = schedule.start_date.strftime("%d %b %Y")
-    end_date_str = schedule.end_date.strftime("%d %b %Y") if schedule.end_date else None
-    date_range_str = f"{start_date_str} - {end_date_str}" if end_date_str else start_date_str
-
-    # Email Data
-    email_data = {
-        'subject': f'Route Visit Scheduled: {schedule.route.name} ({date_range_str})',
-        'to_email': schedule.route.merchandiser.email,
-        'attachments': [{
-            'filename': 'route_schedule.ics',
-            'content': calendar_data['calendar'].to_ical(),
-            'mimetype': 'text/calendar'
-        }],
-        'content_subtype': 'html'
-    }
-
-    available_times = schedule.available_time.all()
-    days_of_week = sorted(set(at.day_of_week for at in available_times))
-    day_names_list = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-    days_with_info = []
-    for day_num in days_of_week:
-        times_for_day = available_times.filter(day_of_week=day_num)
-        day_info = {
-            'day_name': day_names_list[day_num],
-            'times': []
-        }
-        for at in times_for_day:
-            day_info['times'].append({
-                'start_time': at.start_time,
-                'end_time': at.end_time
-            })
-        days_with_info.append(day_info)
-
-    # Render the HTML template
-    context = {
-        'schedule': schedule,
-        'date_range_str': date_range_str,
-        'days_with_info': days_with_info,
-        # 'available_times': schedule.available_time.all(),
-        # 'days_of_week': days_of_week,
-        # 'day_names': day_names,
-    }
-    email_data['body'] = render_to_string('email/route_schedule_email.html', context)
-
-    # Send Email
-    return EmailService.send_email(**email_data)
-
-
-def create_calendar_event(schedule):
-    cal = Calendar()
-    cal.add('prodid', '-//Route Plan//Route Schedule//EN')
-    cal.add('version', '2.0')
-    cal.add('calscale', 'GREGORIAN')
-
-    tz = pytz.timezone('UTC')
-    vtimezone = Timezone()
-    vtimezone.add('TZID', 'UTC')
-    cal.add_component(vtimezone)
-
-    available_times = schedule.available_time.all()
-
-    if not available_times:
-        return {'calendar': cal,'start_time_str': "No Time Specified", 'end_time_str': "No Time Specified"}
-
-    event = Event()
-    event.add('summary', f'Route Visit: {schedule.route.name}')
-
-
-    start_times = [datetime.combine(schedule.start_date, at.start_time).replace(tzinfo=pytz.UTC) for at in available_times]
-    end_times = [datetime.combine(schedule.start_date, at.end_time).replace(tzinfo=pytz.UTC) for at in available_times]
-
-    start_dt = min(start_times)
-    end_dt = max(end_times)
-
-    event.add('dtstart', start_dt)
-    event.add('dtend', end_dt)
-
-    if schedule.end_date:
-        until_date = datetime.combine(schedule.end_date, max([at.end_time for at in available_times])).replace(tzinfo=pytz.UTC)
-
-        day_names = []
-        for at in available_times:
-            day_name = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][at.day_of_week]
-            if day_name not in day_names:
-                day_names.append(day_name)
-
-        rrule = {
-            'freq': 'WEEKLY',
-            'byday': day_names,
-            'until': until_date
-        }
-        
-        event.add('rrule', rrule)  
-
-    
-    cal.add_component(event)
-    
-    start_time_str = min([at.start_time for at in available_times]).strftime('%I:%M %p')
-    end_time_str = max([at.end_time for at in available_times]).strftime('%I:%M %p')
-
-    return {'calendar': cal, 'start_time_str': start_time_str, 'end_time_str': end_time_str}

@@ -5,7 +5,7 @@ import * as constants from "../../../components/constants/Route";
 import {
   useDeleteRouteMutation,
   useGetAllRoutesQuery,
-  useResendRouteEmailMutation,
+  useResendEmailMutation,
 } from "../../../redux/slices/routeSlice";
 import ActionMenu from "../../../components/action-menu/ActionMenu";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ function ViewRoutes() {
   const { DataTable, currentPage, pageSize, selectedRowKeys } = useDataTable();
   const [deleteRoute] = useDeleteRouteMutation();
   const hasSelected = selectedRowKeys.length > 0;
-  const [resendRouteEmail] = useResendRouteEmailMutation();
+  const [resendEmail] = useResendEmailMutation();
 
   // View Action
   const additionalActions = [
@@ -25,9 +25,10 @@ function ViewRoutes() {
       key: "view",
       icon: <EyeOutlined />,
       text: "View Details",
-      onclick: (id) => navigate(`/routes/${id}/view`),
+      onclick: (record) => navigate(`/routes/${record.id}/view`),
     },
   ];
+
   const tableColumns = [
     ...constants.columns,
     {
@@ -40,33 +41,46 @@ function ViewRoutes() {
           onDelete={deleteRoute}
           updateEntityPath="/routes"
           additionalActions={additionalActions}
-          onResendEmail={async (row) => {
-            try {
-              await resendRouteEmail(row.id).unwrap();
-              message.success("Notification email resent successfully");
-            } catch (error) {
-              message.error("Failed to resend email notification");
+          onResendEmail={async (record) => {
+            if (record.route_schedules && record.route_schedules.length > 0) {
+              const routeSchedule = record.route_schedules[0];
+              try {
+                await resendEmail(routeSchedule.id).unwrap();
+                message.success("Email resent successfully");
+              } catch (error) {
+                message.error("Failed to resend email");
+              }
+            } else {
+              message.error("No schedule found");
             }
           }}
         />
       ),
     },
   ];
+
   const {
     data: routes,
     isLoading,
     error,
+    refresh,
   } = useGetAllRoutesQuery({
     page: currentPage,
     size: pageSize,
   });
-  console.log("Fetched routes data:", routes);
+
+  if (isLoading) {
+    return <div>Loading routes...</div>;
+  }
+
+  if (error) {
+    console.error("Error fetching routes:", error);
+    return <div>Error loading routes. Please try again later.</div>;
+  }
 
   return (
     <div className="view-routes">
-      {console.log("DataSource for DataTable:", routes)}
-
-      <Header addNewPath={"routes/create"} hasSelected={hasSelected} />
+      <Header addNewPath="routes/create" hasSelected={hasSelected} />
       <div className="table-container">
         <DataTable
           columns={tableColumns}

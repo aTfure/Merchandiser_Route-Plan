@@ -5,7 +5,7 @@ import { routeRequests, routeScheduleRequests } from "../../API/requests";
 export const RouteApi = createApi({
   reducerPath: "routeApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/" }),
-  tagTypes: ["Route"],
+  tagTypes: ["Route", "RouteSchedule"],
   endpoints: (builder) => ({
     getAllRoutes: builder.query({
       queryFn: async (params) => {
@@ -79,15 +79,16 @@ export const RouteApi = createApi({
       invalidatesTags: ["Route"],
     }),
 
-    resendRouteEmail: builder.mutation({
-      queryFn: async (id) => {
+    resendEmail: builder.mutation({
+      query: async (id) => {
         try {
-          const data = await routeRequests.resendRouteEmail(id);
+          const data = await routeScheduleRequests.resendEmail(id);
           return { data };
         } catch (error) {
           return { error };
         }
       },
+      invalidatesTags: ["RouteSchedule"],
     }),
     // Route Schedule Endpoints:
     getAllRouteSchedules: builder.query({
@@ -155,7 +156,7 @@ export const {
   useUpdateRouteMutation,
   useDeleteRouteMutation,
   useAddOutletsToRouteMutation,
-  useResendRouteEmailMutation,
+  useResendEmailMutation,
   useGetAllRouteSchedulesQuery,
   useGetRouteScheduleByIdQuery,
   useCreateRouteScheduleMutation,

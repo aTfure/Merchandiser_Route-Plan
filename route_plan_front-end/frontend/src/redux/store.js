@@ -17,13 +17,13 @@ export const store = configureStore({
     [RouteApi.reducerPath]: RouteApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat([
+    getDefaultMiddleware().concat(
       authApi.middleware,
       merchandiserApi.middleware,
       ChannelApi.middleware,
       OutletApi.middleware,
-      RouteApi.middleware,
-    ]),
+      RouteApi.middleware
+    ),
 });
 
 setupListeners(store.dispatch);
