@@ -10,7 +10,7 @@ const ProtectedLayout = () => {
       <Outlet />
     </MainLayout>
   ) : (
-    <Navigate to="/dashboard" replace />
+    <Navigate to="/login" replace />
   );
 };
 

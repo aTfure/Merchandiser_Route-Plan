@@ -1,0 +1,236 @@
+// Neubrutalism Variables
+$primary-color: #ff6b6b;
+$secondary-color: #4ecdc4;
+$accent-color: #ffe66d;
+$black: #000000;
+$white: #ffffff;
+
+// Brutalist Mixins
+@mixin brutal-shadow {
+  box-shadow: 5px 5px 0px $black;
+  border: 2px solid $black;
+}
+
+@mixin brutal-hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px $black;
+}
+
+.neubrutalism {
+  background-color: #f0f0f0;
+  font-family: "Space Grotesk", sans-serif;
+
+  .navbar {
+    padding: 20px 40px;
+    background-color: $white;
+    @include brutal-shadow;
+    margin: 20px;
+
+    .container {
+      max-width: 1400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      font-size: 2rem;
+      font-weight: 700;
+      color: $primary-color;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+
+      li {
+        a {
+          font-weight: 600;
+          color: $black;
+          text-decoration: none;
+          transition: color 0.3s ease;
+
+          &:hover,
+          &.active {
+            color: $primary-color;
+          }
+        }
+
+        &.start-trial {
+          a {
+            background-color: $black;
+
+            color: $white;
+
+            padding: 10px 20px;
+
+            border-radius: 5px;
+
+            transition: background-color 0.3s ease;
+
+            &:hover {
+              background-color: darken($black, 10%);
+            }
+          }
+        }
+        &.login {
+          a {
+            color: $black;
+            padding: 10px 20px;
+            transition: color 0.3s ease;
+
+            &:hover {
+              color: $primary-color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .hero-section {
+    margin: 40px 20px;
+    padding: 60px;
+    background-color: $secondary-color;
+    @include brutal-shadow;
+    position: relative;
+    overflow: hidden;
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: $black;
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin-bottom: 40px;
+    }
+
+    .shape-1,
+    .shape-2 {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background-color: $accent-color;
+      @include brutal-shadow;
+    }
+
+    .shape-1 {
+      right: -50px;
+      top: -50px;
+      transform: rotate(15deg);
+    }
+
+    .shape-2 {
+      right: 100px;
+      bottom: -50px;
+      transform: rotate(-15deg);
+    }
+  }
+
+  .features-section {
+    margin: 40px 20px;
+    padding: 40px;
+
+    .features-grid {
+      gap: 30px;
+
+      .feature-card {
+        background-color: $white;
+        padding: 30px;
+        @include brutal-shadow;
+        transition: all 0.3s ease;
+
+        &:hover {
+          @include brutal-hover;
+        }
+      }
+    }
+  }
+
+  .how-it-works {
+    margin: 40px 20px;
+    padding: 40px;
+    background-color: $accent-color;
+    @include brutal-shadow;
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+
+      .step {
+        background-color: $white;
+        padding: 30px;
+        @include brutal-shadow;
+
+        .step-number {
+          font-size: 2rem;
+          font-weight: 800;
+          color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .cta-button {
+    background-color: $primary-color;
+    color: $white;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    @include brutal-shadow;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      @include brutal-hover;
+    }
+  }
+
+  .cta-section {
+    margin: 40px 20px;
+    padding: 60px;
+    background-color: $primary-color;
+    @include brutal-shadow;
+    text-align: center;
+
+    h2 {
+      color: $white;
+      font-size: 3rem;
+      margin-bottom: 30px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .neubrutalism {
+    .navbar {
+      margin: 10px;
+      padding: 15px;
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    .hero-section {
+      margin: 20px 10px;
+      padding: 30px;
+
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
+  }
+}

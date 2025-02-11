@@ -24,15 +24,21 @@ import ViewRoutes from "./pages/admin/routes/List";
 import AddRoute from "./pages/admin/routes/Add";
 import EditRoute from "./pages/admin/routes/Edit";
 import ViewRouteDetails from "./pages/admin/routes/View";
+import LandingPage from "./pages/landing/landing.page";
+import ProtectedLayout from "./ProtectedLayout";
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <LandingPage />
+  },
   {
     path: "login",
     element: <Login />,
   },
   {
-    path: "/",
-    element: <MainLayout />,
+    path: "/dashboard",
+    element: <ProtectedLayout />,
     children: [
       {
         index: true,

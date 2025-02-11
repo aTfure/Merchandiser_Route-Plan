@@ -1,0 +1,50 @@
+Basic reset
+body {
+    margin: 0;
+    font-family: sans-serif; /* Choose your font */
+}
+
+.container {
+    width: 960px; /* Adjust as needed */
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background-color: #f0f0f0; /* Example color */
+    padding: 40px 0;
+    text-align: center;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.cta-button {
+    background-color: #007bff; /* Example color */
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+/* Style other sections (benefits, features, etc.) */
+/* ... */
+
+footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Make it responsive */
+@media (max-width: 768px) {
+  .container {
+    width: 90%;
+  }
+  /* Adjust other styles for smaller screens */
+}
