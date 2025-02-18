@@ -30,7 +30,7 @@ import ProtectedLayout from "./ProtectedLayout";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LandingPage />
+    element: <LandingPage />,
   },
   {
     path: "login",

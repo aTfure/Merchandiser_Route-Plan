@@ -22,6 +22,11 @@ from merchandisers.views import MerchandiserViewSet
 from outlets.views import OutletViewSet, ChannelTypeViewSet, OutletMapViewSet
 from routes.views import RouteViewSet, RouteScheduleViewSet, RouteScheduleList, RouteScheduleDetail
 from rest_framework import routers
+from django.http import JsonResponse
+
+
+def healthcheck(request):
+    return JsonResponse({'status': 'ok'})
 
 
 

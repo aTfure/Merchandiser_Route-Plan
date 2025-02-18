@@ -1,0 +1,6 @@
+# Ignore environment settings
+
+venv/
+.env
+.DB_Store
+__pycache__

@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout, Menu } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   DashboardOutlined,
   SettingOutlined,
@@ -101,21 +101,25 @@ const menuItems = [
 const SiderMenu = ({ handleOnCollapse, collapsed }) => {
   const theme = "light";
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleMenuClick = ({ key }) => {
-    const routes = {
+    const routeMap = {
       dashboard: "/dashboard",
       showMerchandisers: "/merchandisers",
-      addMerchandiser: "merchandisers/create",
+      addMerchandiser: "/merchandisers/create",
       showOutlets: "/outlets",
-      addOutlet: "outlets/create",
+      addOutlet: "/outlets/create",
       showChannels: "/channels",
-      addChannel: "channels/create",
+      addChannel: "/channels/create",
       showRoutes: "/routes",
-      addRoute: "routes/create",
+      addRoute: "/routes/create",
       settings: "/settings",
     };
-    navigate(routes[key] || "/");
+
+    if (routeMap[key]) {
+      navigate(routeMap[key]);
+    }
   };
 
   return (
